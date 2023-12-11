@@ -12,7 +12,7 @@
     <a href="https://securityscorecards.dev/viewer/?uri=github.com/ctfer-io/victor"><img src="https://img.shields.io/ossf-scorecard/github.com/ctfer-io/victor?label=openssf%20scorecard&style=for-the-badge" alt="OpenSSF Scoreboard"></a>
 </div>
 
-## How to use
+## How to use
 
 You can drop the following into your Drone pipeline (`type: docker`).
 
@@ -43,4 +43,24 @@ steps:
         from_secret: MY_VAR2
 ```
 
-## How it works
+## How it works
+
+The following resumes what Victor does for you.
+
+<div align="center">
+  <img src="res/how-it-works.png" alt="How it works in a Drone pipeline">
+</div>
+
+Here are more explanation:
+ 1. **Get stack if exist**: Victor create a new Pulumi workspace in your Drone pipeline, then create a stack, and if the webserver contains a state file, loads it. This enable the following to work properly.
+ 2. **Update**: by comparing the existing and actualised resources (does a refresh first) to the target, Victor enable fine-grained continuous deployment of your resources.
+ 3. **Push updated stack**: finally, Victor exports the stack state file and uploads it in the webserver such that future iterations will be able to load it, to really do **continuous** deployment.
+
+## Why using it ?
+
+So why doing it with a Drone plugin rather than using multiple steps ?
+
+<p align="center">✨ <b>Simplicity</b> ✨</p>
+
+Using this plugin, you ease your Continuous Deployments from a Drone pipeline, without the need to maintain plugin updates, stack import and export, basic authentication handling...
+Yes you can work without it, but why not simplify your job and focus on the **real** business value ?
