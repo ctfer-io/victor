@@ -17,8 +17,8 @@ builds:
 
 dockers:
   - image_templates:
-      - "ctfer-io/{{ .ProjectName }}:latest"
-      - "ctfer-io/{{ .ProjectName }}:{{ .Tag }}"
+      - "ctferio/{{ .ProjectName }}:latest"
+      - "ctferio/{{ .ProjectName }}:{{ .Tag }}"
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{ .Date }}"
       - "--label=org.opencontainers.image.title={{ .ProjectName }}"
