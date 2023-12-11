@@ -146,7 +146,7 @@ func run(ctx *cli.Context) error {
 	for _, res := range resources {
 		name, version, _ := strings.Cut(res, " ")
 		if err := ws.InstallPluginFromServer(ctx.Context, name, version, server); err != nil {
-			fmt.Fprintf(os.Stderr, "an error occured while installing resource %s from %s: %s", res, server, err)
+			fmt.Fprintf(os.Stderr, "an error occurred while installing resource %s from %s: %s", res, server, err)
 			failed = true
 		}
 	}
