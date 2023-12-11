@@ -2,6 +2,7 @@
     <h1>Victor</h1>
     <p><b>Victor is always here to assist you through continuous deployment, and especially<br>when updating and storing Pulumi stack states in webservers through a Drone pipeline.</b><p>
     <a href="https://pkg.go.dev/github.com/ctfer-io/victor"><img src="https://shields.io/badge/-reference-blue?logo=go&style=for-the-badge" alt="reference"></a>
+    <a href="https://hub.docker.com/r/ctferio/victor"><img src="https://img.shields.io/docker/pulls/ctferio/victor?style=for-the-badge" alt="docker pulls"></a>
 	<a href="https://goreportcard.com/report/github.com/ctfer-io/victor"><img src="https://goreportcard.com/badge/github.com/ctfer-io/victor?style=for-the-badge" alt="go report"></a>
 	<a href="https://coveralls.io/github/ctfer-io/victor?branch=main"><img src="https://img.shields.io/coverallsCoverage/github/ctfer-io/victor?style=for-the-badge" alt="Coverage Status"></a>
 	<br>
