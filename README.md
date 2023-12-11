@@ -19,7 +19,7 @@ You can drop the following into your Drone pipeline (`type: docker`).
 ```yaml
 steps:
   - name: victor
-    image: ctfer-io/victor:latest
+    image: ctferio/victor:latest
     settings:
       # Webserver related options
       statefile: https://my-webserver.dev/project.stack.state
