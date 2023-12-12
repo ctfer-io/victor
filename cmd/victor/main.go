@@ -188,9 +188,15 @@ func run(ctx *cli.Context) error {
 	confs := ctx.StringSlice("configuration")
 	for _, conf := range confs {
 		k, v, _ := strings.Cut(conf, " ")
-		stack.SetConfig(ctx.Context, k, auto.ConfigValue{
+		if err := stack.SetConfig(ctx.Context, k, auto.ConfigValue{
 			Value: v,
-		})
+		}); err != nil {
+			fmt.Fprintf(os.Stderr, "an error occurred while setting stack configuration tuple %s: %s", conf, err)
+			failed = true
+		}
+	}
+	if failed {
+		return errors.New("one or more errors happened during stack configuration, failing fast.")
 	}
 
 	// Refresh and update
