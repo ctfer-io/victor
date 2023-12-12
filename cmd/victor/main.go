@@ -90,6 +90,13 @@ func main() {
 				Required: false,
 				EnvVars:  []string{"PLUGIN_RESOURCES"},
 			},
+			&cli.StringSliceFlag{
+				Name:     "configuration",
+				Category: catPulumi,
+				Usage:    "List of configurations tuples (<key> <value>) to pass to the Pulumi entrypoint. Does not support secrets yet.",
+				Required: false,
+				EnvVars:  []string{"PLUGIN_CONFIGURATION"},
+			},
 			&cli.StringFlag{
 				Name:     "outputs",
 				Category: catPulumi,
@@ -175,6 +182,15 @@ func run(ctx *cli.Context) error {
 	stack, err := victor.GetStack(ctx.Context, client, ws, statefile)
 	if err != nil {
 		return err
+	}
+
+	// Set stack configuration
+	confs := ctx.StringSlice("configuration")
+	for _, conf := range confs {
+		k, v, _ := strings.Cut(conf, " ")
+		stack.SetConfig(ctx.Context, k, auto.ConfigValue{
+			Value: v,
+		})
 	}
 
 	// Refresh and update

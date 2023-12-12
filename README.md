@@ -35,6 +35,9 @@ steps:
       resources:
         - "kubernetes 3.29.1"
         - "random 4.13.2"
+      configuration:
+        - "namespace prod"
+        - "version v1.5.2"
       server: https://my-webserver.dev/pulumi
       outputs: outputs.json
     # Specific environment variables that fit your context (e.g. offline)
