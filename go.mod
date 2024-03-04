@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/pulumi/pulumi/sdk/v3 v3.107.0
+	github.com/pulumi/pulumi/sdk/v3 v3.108.1
 	github.com/urfave/cli/v2 v2.27.1
 )
 
@@ -36,6 +36,7 @@ require (
 	github.com/golang/glog v1.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
