@@ -36,7 +36,10 @@ func main() {
 			cli.VersionFlag,
 			cli.HelpFlag,
 			&cli.BoolFlag{
-				Name: "verbose",
+				Name:     "verbose",
+				Usage:    "Turn on the verbose mode i.e. writes the Pulumi state outputs to stdout.",
+				Required: false,
+				EnvVars:  []string{"PLUGIN_VERBOSE"},
 			},
 			// Webserver related
 			&cli.StringFlag{
