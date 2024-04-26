@@ -1,0 +1,41 @@
+name: 'Victor'
+author: 'ctfer-io'
+description: 'Continuous Deployment of a Pulumi stack, with file storing in a web server.'
+
+inputs:
+  verbose:
+    description: 'Turn on the verbose mode i.e. writes the Pulumi state outputs to stdout.'
+  statefile:
+    description: 'Where the Pulumi stack state file is supposed to be saved. If it does not currently exist, Victor will create a brand new one.'
+    required: true
+  username:
+    description: 'What username to use when getting/pushing the Pulumi stack state file. Don''t set for unauthenticated.'
+  password:
+    description: 'What password to use when getting/pushing the Pulumi stack state file. Don''t set for unauthenticated.'
+  passphrase:
+    description: 'Pulumi stack password, used to decipher and recipher the state.'
+  context:
+    description: 'Where to deploy i.e. the Pulumi entrypoint (the directory pointing to a `main.go` file containing the `pulumi.Run` call).'
+  server:
+    description: 'Where to download the Pulumi plugin resources. If set, overrides the online default mode of Pulumi.'
+  resources:
+    description: 'List of Pulumi plugin resources (<name> <version>) to install before performing the update.'
+  configuration:
+    description: 'List of configurations tuples (<key> <value>) to pass to the Pulumi entrypoint. Does not support secrets yet.'
+  outputs:
+    description: 'Where to write the Pulumi stack outputs. If set to "-" will write to stdout, else to the given filename.'
+
+runs:
+  using: docker
+  image: 'Dockerfile'
+  env:
+    VERBOSE: ${{ inputs.verbose }}
+    STATEFILE: ${{ inputs.statefile }}
+    USERNAME: ${{ inputs.username }}
+    PASSWORD: ${{ inputs.password }}
+    PULUMI_CONFIG_PASSPHRASE: ${{ inputs.passphrase }}
+    CONTEXT: ${{ inputs.context }}
+    SERVER: ${{ inputs.server }}
+    RESOURCES: ${{ inputs.resources }}
+    CONFIGURATION: ${{ inputs.configuration }}
+    OUTPUTS: ${{ inputs.outputs }}

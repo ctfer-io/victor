@@ -15,7 +15,45 @@
 
 ## How to use
 
-You can drop the following into your Drone pipeline (`type: docker`).
+You can drop the following into your GitHub Action workflow.
+
+```yaml
+name: 'My workflow'
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  my-job:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'Victor CD'
+        uses: 'ctfer-io/victor@v0'
+        with:
+          # Webserver related options
+          statefile: 'https://my-webserver.dev/project.stack.state'
+          username: ${{ secrets.WEBDAV_USERNAME }}
+          password: ${{ secrets.WEBDAV_PASSWORD }}
+          # Pulumi related options
+          passphrase: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          context: './deploy'
+          resources:
+            - "kubernetes 3.29.1"
+            - "random 4.13.2"
+          configuration:
+            - "namespace prod"
+            - "version v1.5.2"
+          server: 'https://my-webserver.dev/pulumi'
+          outputs: 'outputs.json'
+        # Specific environment variables that fit your context (e.g. offline)
+        env:
+          MY_VAR1: 'my_value'
+          MY_VAR2: ${{ secrets.MY_VAR2 }}
+```
+
+Alternatively, you can use it in a Drone pipeline (`type: docker`).
 
 ```yaml
 steps:
@@ -52,11 +90,11 @@ steps:
 The following resumes what Victor does for you.
 
 <div align="center">
-  <img src="res/how-it-works.png" alt="How it works in a Drone pipeline">
+  <img src="res/how-it-works.excalidraw.png" alt="How it works in a Drone pipeline">
 </div>
 
 Here are more explanation:
- 1. **Get stack if exist**: Victor create a new Pulumi workspace in your Drone pipeline, then create a stack, and if the webserver contains a state file, loads it. This enable the following to work properly.
+ 1. **Get stack if exist**: Victor create a new Pulumi workspace in your GitHub Action workflow or Drone pipeline, then create a stack, and if the webserver contains a state file, loads it. This enable the following to work properly.
  2. **Update**: by comparing the existing and actualised resources (does a refresh first) to the target, Victor enable fine-grained continuous deployment of your resources.
  3. **Push updated stack**: finally, Victor exports the stack state file and uploads it in the webserver such that future iterations will be able to load it, to really do **continuous** deployment.
 
