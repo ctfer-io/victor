@@ -56,10 +56,10 @@ func Victor(ctx context.Context, args *VictorArgs) error {
 	for _, res := range args.Resources {
 		name, version, _ := strings.Cut(res, " ")
 		if args.Server == nil {
-			multierr.Append(merr, ws.InstallPlugin(ctx, name, version))
+			merr = multierr.Append(merr, ws.InstallPlugin(ctx, name, version))
 			continue
 		}
-		multierr.Append(merr, ws.InstallPluginFromServer(ctx, name, version, *args.Server))
+		merr = multierr.Append(merr, ws.InstallPluginFromServer(ctx, name, version, *args.Server))
 	}
 	if merr != nil {
 		return errors.Wrap(merr, "pulumi resources install, failing fast")
