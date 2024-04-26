@@ -6,6 +6,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pulumi/pulumi/sdk/v3 v3.113.3
 	github.com/urfave/cli/v2 v2.27.1
+	go.uber.org/multierr v1.10.0
+	go.uber.org/zap v1.27.0
 )
 
 require (

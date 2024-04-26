@@ -3,7 +3,6 @@ package victor
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -14,9 +13,10 @@ import (
 
 // GetStack fetches the Pulumi stack state file from the provided url,
 // and if it does not exist, create a brand new one.
-func GetStack(ctx context.Context, client *Client, ws auto.Workspace, url string) (auto.Stack, error) {
+func GetStack(ctx context.Context, client *Client, ws auto.Workspace, url string, verbose bool) (auto.Stack, error) {
 	// TODO extract the stack from the url ? or the workspace ?
 	stackName := "victor"
+	logger := Log()
 
 	// Get stack
 	stack, err := auto.UpsertStack(ctx, stackName, ws)
@@ -32,13 +32,13 @@ func GetStack(ctx context.Context, client *Client, ws auto.Workspace, url string
 	}
 	defer res.Body.Close()
 	if res.StatusCode == http.StatusNotFound {
-		if Verbose {
-			fmt.Println("  stack file not found, starting from a brand new one.")
+		if verbose {
+			logger.Info("stack file not found, starting from a brand new one")
 		}
 		return stack, nil
 	}
-	if Verbose {
-		fmt.Println("  loading existing stack.")
+	if verbose {
+		logger.Info("loading existing stack")
 	}
 
 	// Load state

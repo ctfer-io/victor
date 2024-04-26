@@ -4,18 +4,25 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 // Client is the Victor's wrapper around a *http.Client that handles
 // authentication and request management.
 type Client struct {
+	version string
+	verbose bool
+
 	username, password *string
 	sub                *http.Client
 }
 
 // NewClient is a *Client factory.
-func NewClient(username, password *string) *Client {
+func NewClient(version string, verbose bool, username, password *string) *Client {
 	return &Client{
+		version:  version,
+		verbose:  verbose,
 		username: username,
 		password: password,
 		sub:      &http.Client{},
@@ -23,9 +30,13 @@ func NewClient(username, password *string) *Client {
 }
 
 func (client *Client) Do(req *http.Request) (*http.Response, error) {
-	fmt.Printf("Getting content at %s", req.URL)
+	if client.verbose {
+		Log().Info("getting distant content",
+			zap.String("location", req.URL.String()),
+		)
+	}
 
-	req.Header.Set("User-Agent", fmt.Sprintf("CTFer.io Victor (%s)", Version))
+	req.Header.Set("User-Agent", fmt.Sprintf("CTFer.io Victor (%s)", client.version))
 	if client.username != nil && client.password != nil {
 		bauth := fmt.Sprintf("%s:%s", *client.username, *client.password)
 		bauth = base64.StdEncoding.EncodeToString([]byte(bauth))

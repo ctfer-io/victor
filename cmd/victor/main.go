@@ -2,17 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/ctfer-io/victor"
-	"github.com/pkg/errors"
-	"github.com/pulumi/pulumi/sdk/v3/go/auto"
-	"github.com/pulumi/pulumi/sdk/v3/go/auto/optup"
 	"github.com/urfave/cli/v2"
 )
 
@@ -134,107 +129,27 @@ func main() {
 }
 
 func run(ctx *cli.Context) error {
-	// Populate globals
-	victor.Version = version
-	victor.Verbose = ctx.Bool("verbose")
-
-	// Build Victor's client
-	var username, password *string
-	if ctx.IsSet("username") {
-		username = ptr(ctx.String("username"))
+	// Build SDK arguments
+	args := &victor.VictorArgs{
+		Verbose:       ctx.Bool("verbose"),
+		Version:       version,
+		Statefile:     ctx.String("statefile"),
+		Username:      ptrCli(ctx, "username"),
+		Password:      ptrCli(ctx, "password"),
+		Passphrase:    ctx.String("passphrase"),
+		Context:       ctx.String("context"),
+		Server:        ptrCli(ctx, "server"),
+		Resources:     ctx.StringSlice("resources"),
+		Configuration: ctx.StringSlice("configuration"),
+		Outputs:       ptrCli(ctx, "outputs"),
 	}
-	if ctx.IsSet("password") {
-		password = ptr(ctx.String("password"))
-	}
-	client := victor.NewClient(username, password)
-
-	// Create the workspace
-	if victor.Verbose {
-		fmt.Println("Creating the local workspace")
-	}
-	statefile := ctx.String("statefile")
-	ws, err := auto.NewLocalWorkspace(ctx.Context,
-		auto.WorkDir(ctx.String("context")),
-		auto.EnvVars(map[string]string{
-			"PULUMI_CONFIG_PASSPHRASE": ctx.String("passphrase"),
-		}),
-	)
-	if err != nil {
-		return errors.Wrap(err, "while creating the local workspace")
-	}
-
-	// Install resources
-	server := ctx.String("server")
-	resources := ctx.StringSlice("resources")
-	failed := false
-	for _, res := range resources {
-		name, version, _ := strings.Cut(res, " ")
-		if err := ws.InstallPluginFromServer(ctx.Context, name, version, server); err != nil {
-			fmt.Fprintf(os.Stderr, "an error occurred while installing resource %s from %s: %s", res, server, err)
-			failed = true
-		}
-	}
-	if failed {
-		return errors.New("one or more errors happened during resources install, failing fast.")
-	}
-
-	// Get stack
-	if victor.Verbose {
-		fmt.Println("Getting the stack")
-	}
-	stack, err := victor.GetStack(ctx.Context, client, ws, statefile)
-	if err != nil {
-		return err
-	}
-
-	// Set stack configuration
-	confs := ctx.StringSlice("configuration")
-	for _, conf := range confs {
-		k, v, _ := strings.Cut(conf, " ")
-		if err := stack.SetConfig(ctx.Context, k, auto.ConfigValue{
-			Value: v,
-		}); err != nil {
-			fmt.Fprintf(os.Stderr, "an error occurred while setting stack configuration tuple %s: %s", conf, err)
-			failed = true
-		}
-	}
-	if failed {
-		return errors.New("one or more errors happened during stack configuration, failing fast.")
-	}
-
-	// Refresh and update
-	upopts := []optup.Option{}
-	if victor.Verbose {
-		fmt.Println("Refreshing and updating Pulumi stack")
-		upopts = append(upopts, optup.ProgressStreams(os.Stdout))
-	}
-	_, err = stack.Refresh(ctx.Context)
-	if err != nil {
-		return errors.Wrap(err, "while refreshing Pulumi stack")
-	}
-	res, err := stack.Up(ctx.Context, upopts...)
-	if err != nil {
-		return errors.Wrap(err, "while stack up")
-	}
-
-	// Export outputs
-	if ctx.IsSet("outputs") {
-		if err := victor.ExportOutputs(res.Outputs, ctx.String("outputs")); err != nil {
-			fmt.Fprintf(os.Stderr, "while exporting outputs, got: %s", err)
-		}
-	}
-
-	// Export stack
-	if victor.Verbose {
-		fmt.Println("Pushing the stack")
-	}
-	if err := victor.PushStack(ctx.Context, client, stack, statefile); err != nil {
-		return err
-	}
-
-	return nil
+	return victor.Victor(ctx.Context, args)
 }
 
-func ptr[T any](t T) *T {
-	return &t
+func ptrCli(ctx *cli.Context, key string) *string {
+	v := ctx.String(key)
+	if ctx.IsSet(key) {
+		return &v
+	}
+	return nil
 }
