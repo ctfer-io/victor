@@ -1,6 +1,6 @@
 <div align="center">
     <h1>Victor</h1>
-    <p><b>Victor is always here to assist you through continuous deployment, and especially<br>when updating and storing Pulumi stack states in webservers through a Drone pipeline.</b><p>
+    <p><b>Victor is always here to assist you through continuous deployment, and especially when updating and storing Pulumi stack states in webservers through a GitHub Action workflow or a Drone pipeline.</b><p>
     <a href="https://pkg.go.dev/github.com/ctfer-io/victor"><img src="https://shields.io/badge/-reference-blue?logo=go&style=for-the-badge" alt="reference"></a>
     <a href="https://hub.docker.com/r/ctferio/victor"><img src="https://img.shields.io/docker/pulls/ctferio/victor?style=for-the-badge" alt="docker pulls"></a>
 	<a href="https://goreportcard.com/report/github.com/ctfer-io/victor"><img src="https://goreportcard.com/badge/github.com/ctfer-io/victor?style=for-the-badge" alt="go report"></a>
@@ -90,7 +90,7 @@ steps:
 The following resumes what Victor does for you.
 
 <div align="center">
-  <img src="res/how-it-works.excalidraw.png" alt="How it works in a Drone pipeline">
+  <img src="res/how-it-works.excalidraw.png" alt="How it works in a GitHub Action workflow or a Drone pipeline">
 </div>
 
 Here are more explanation:
@@ -100,9 +100,9 @@ Here are more explanation:
 
 ## Why using it ?
 
-So why doing it with a Drone plugin rather than using multiple steps ?
+So why doing it with a GitHub Action or a Drone plugin rather than using multiple steps ?
 
 <p align="center">✨ <b>Simplicity</b> ✨</p>
 
-Using this plugin, you ease your Continuous Deployments from a Drone pipeline, without the need to maintain plugin updates, stack import and export, basic authentication handling...
+Using this plugin, you ease your Continuous Deployments from a GitHub Action workflow or a Drone pipeline, without the need to maintain plugin updates, stack import and export, basic authentication handling...
 Yes you can work without it, but why not simplify your job and focus on the **real** business value ?
