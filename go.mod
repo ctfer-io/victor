@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/pulumi/pulumi/sdk/v3 v3.119.0
+	github.com/pulumi/pulumi/sdk/v3 v3.121.0
 	github.com/urfave/cli/v2 v2.27.2
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.27.0
@@ -12,6 +12,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
+	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
