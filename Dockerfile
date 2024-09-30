@@ -1,4 +1,4 @@
-FROM pulumi/pulumi-go:3.133.0@sha256:e4a3d653d98e77fca00cf0e02a062165073ee1f72efc9b5c8568a6e963d1193c
+FROM pulumi/pulumi-go:3.134.1@sha256:230b0d79de53099aca709f8d0613f0dc339523ae8df286f4182ca7a43cbb0582
 COPY victor /victor
 RUN pulumi login --local
 ENTRYPOINT [ "/victor" ]
