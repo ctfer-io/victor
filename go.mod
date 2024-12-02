@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/pulumi/pulumi/sdk/v3 v3.141.0
+	github.com/pulumi/pulumi/sdk/v3 v3.142.0
 	github.com/urfave/cli/v2 v2.27.5
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.27.0
