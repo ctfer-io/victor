@@ -30,7 +30,10 @@ func GetStack(ctx context.Context, client *Client, ws auto.Workspace, url string
 	if err != nil {
 		return auto.Stack{}, errors.Wrapf(err, "while fetching %s", url)
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+
+	}()
 	if res.StatusCode == http.StatusNotFound {
 		if verbose {
 			logger.Info("stack file not found, starting from a brand new one")
@@ -75,7 +78,9 @@ func PushStack(ctx context.Context, client *Client, stack auto.Stack, url string
 	if err != nil {
 		return errors.Wrapf(err, "while sending state to %s", url)
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	return nil
 }
