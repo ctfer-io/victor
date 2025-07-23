@@ -13,7 +13,7 @@ import (
 
 // GetStack fetches the Pulumi stack state file from the provided url,
 // and if it does not exist, create a brand new one.
-func GetStack(ctx context.Context, client *Client, ws auto.Workspace, url string, verbose bool) (auto.Stack, error) {
+func GetStack(ctx context.Context, cli *Client, ws auto.Workspace, url string, verbose bool) (auto.Stack, error) {
 	// TODO extract the stack from the url ? or the workspace ?
 	stackName := "victor"
 	logger := Log()
@@ -26,20 +26,21 @@ func GetStack(ctx context.Context, client *Client, ws auto.Workspace, url string
 
 	// Get state from webserver if exist
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	res, err := client.Do(req)
+	res, err := cli.Do(req)
 	if err != nil {
 		return auto.Stack{}, errors.Wrapf(err, "while fetching %s", url)
 	}
 	defer func() {
 		_ = res.Body.Close()
-
 	}()
+
 	if res.StatusCode == http.StatusNotFound {
 		if verbose {
 			logger.Info("stack file not found, starting from a brand new one")
 		}
 		return stack, nil
 	}
+
 	if verbose {
 		logger.Info("loading existing stack")
 	}

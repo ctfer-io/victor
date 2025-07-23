@@ -7,23 +7,26 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/pulumi/pulumi/sdk/v3/go/auto"
+	"github.com/pulumi/pulumi/sdk/v3/go/auto/optdestroy"
+	"github.com/pulumi/pulumi/sdk/v3/go/auto/optrefresh"
 	"github.com/pulumi/pulumi/sdk/v3/go/auto/optup"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 )
 
 type VictorArgs struct {
-	Verbose       bool
-	Version       string
-	Statefile     string
-	Username      *string
-	Password      *string
-	Passphrase    string
-	Context       string
-	Server        *string
-	Resources     []string
-	Configuration []string
-	Outputs       *string
+	Verbose           bool
+	Version           string
+	Statefile         string
+	Username          *string
+	Password          *string
+	Passphrase        string
+	Context           string
+	Server            *string
+	Resources         []string
+	Configuration     []string
+	Outputs           *string
+	DestroyIfNonEmpty bool
 }
 
 func Victor(ctx context.Context, args *VictorArgs) error {
@@ -34,8 +37,8 @@ func Victor(ctx context.Context, args *VictorArgs) error {
 	}
 	logger := Log()
 
-	// Build Victor's client
-	client := NewClient(args.Version, args.Verbose, args.Username, args.Password)
+	// Build Victor's cli
+	cli := NewClient(args.Version, args.Verbose, args.Username, args.Password)
 
 	// Create the workspace
 	if args.Verbose {
@@ -69,7 +72,7 @@ func Victor(ctx context.Context, args *VictorArgs) error {
 	if args.Verbose {
 		logger.Info("getting the stack")
 	}
-	stack, err := GetStack(ctx, client, ws, args.Statefile, args.Verbose)
+	stack, err := GetStack(ctx, cli, ws, args.Statefile, args.Verbose)
 	if err != nil {
 		return err
 	}
@@ -86,35 +89,44 @@ func Victor(ctx context.Context, args *VictorArgs) error {
 	}
 
 	// Refresh and update
-	upopts := []optup.Option{}
+	upopts := []optup.Option{
+		optup.UserAgent(cli.UserAgent()),
+	}
 	if args.Verbose {
 		logger.Info("refreshing and updating Pulumi stack")
 		zw := &ZapWriter{logger: logger}
 		upopts = append(upopts, optup.ProgressStreams(zw))
 	}
-	_, err = stack.Refresh(ctx)
+
+	// Make sure to properly track resources and changes
+	refRes, err := stack.Refresh(ctx, optrefresh.UserAgent(cli.UserAgent()))
 	if err != nil {
 		return errors.Wrap(err, "refreshing Pulumi stack")
 	}
+	if refRes.Summary.ResourceChanges != nil && len(*refRes.Summary.ResourceChanges) != 0 {
+		if _, err := stack.Destroy(ctx, optdestroy.UserAgent(cli.UserAgent())); err != nil {
+			return errors.Wrap(err, "destroying Pulumi stack ahead of update")
+		}
+	}
+
+	// Up(date) the stack
 	res, err := stack.Up(ctx, upopts...)
 	if err != nil {
 		return errors.Wrap(err, "stack up")
 	}
 
 	// Export outputs
-	if args.Outputs != nil {
-		if err := ExportOutputs(res.Outputs, *args.Outputs); err != nil {
-			logger.Error("exporting outputs",
-				zap.Error(err),
-			)
-		}
+	if err := args.Export(res.Outputs); err != nil {
+		logger.Error("exporting outputs",
+			zap.Error(err),
+		)
 	}
 
 	// Export stack
 	if args.Verbose {
-		logger.Info("pushing the stack")
+		logger.Info("pushing stack")
 	}
-	return PushStack(ctx, client, stack, args.Statefile)
+	return PushStack(ctx, cli, stack, args.Statefile)
 }
 
 type ZapWriter struct {

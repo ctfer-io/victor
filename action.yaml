@@ -24,6 +24,8 @@ inputs:
     description: 'List of configurations tuples (<key> <value>) to pass to the Pulumi entrypoint. Does not support secrets yet.'
   outputs:
     description: 'Where to write the Pulumi stack outputs. If set to "-" will write to stdout, else to the given filename.'
+  destroy-if-non-empty:
+    description: 'If set to true, and the update plan is non-empty, destroy EVERYHTING first. Use with caution.'
 
 runs:
   using: docker
@@ -39,3 +41,4 @@ runs:
     RESOURCES: ${{ inputs.resources }}
     CONFIGURATION: ${{ inputs.configuration }}
     OUTPUTS: ${{ inputs.outputs }}
+    DESTROY_IF_NON_EMPTY: ${{ inputs.destroy-if-non-empty }}
