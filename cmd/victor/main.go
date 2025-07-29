@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"log"
+	"net/mail"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/ctfer-io/victor"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const (
@@ -24,9 +25,10 @@ var (
 )
 
 func main() {
-	app := &cli.App{
-		Name:  "Victor",
-		Usage: "Continuous Deployment for Pulumi in Drone pileline, with external state management deffered to a webserver.",
+	app := &cli.Command{
+		Name: "Victor",
+		Usage: " Victor is always here to assist you through continuous deployment, and especially when updating" +
+			"and storing Pulumi stack states in webservers through a GitHub Action workflow or a Drone pipeline.",
 		Flags: []cli.Flag{
 			cli.VersionFlag,
 			cli.HelpFlag,
@@ -34,7 +36,7 @@ func main() {
 				Name:     "verbose",
 				Usage:    "Turn on the verbose mode i.e. writes the Pulumi state outputs to stdout.",
 				Required: false,
-				EnvVars:  []string{"VERBOSE", "PLUGIN_VERBOSE"},
+				Sources:  cli.EnvVars("VERBOSE", "PLUGIN_VERBOSE"),
 			},
 			// Webserver related
 			&cli.StringFlag{
@@ -42,21 +44,21 @@ func main() {
 				Category: catWebserver,
 				Usage:    "Where the Pulumi stack state file is supposed to be saved. If it does not currently exist, Victor will create a brand new one.",
 				Required: true,
-				EnvVars:  []string{"STATEFILE", "PLUGIN_STATEFILE"},
+				Sources:  cli.EnvVars("STATEFILE", "PLUGIN_STATEFILE"),
 			},
 			&cli.StringFlag{
 				Name:     "username",
 				Category: catWebserver,
 				Usage:    "What username to use when getting/pushing the Pulumi stack state file. Don't set for unauthenticated.",
 				Required: false,
-				EnvVars:  []string{"USERNAME", "PLUGIN_USERNAME"},
+				Sources:  cli.EnvVars("USERNAME", "PLUGIN_USERNAME"),
 			},
 			&cli.StringFlag{
 				Name:     "password",
 				Category: catWebserver,
 				Usage:    "What password to use when getting/pushing the Pulumi stack state file. Don't set for unauthenticated.",
 				Required: false,
-				EnvVars:  []string{"PASSWORD", "PLUGIN_PASSWORD"},
+				Sources:  cli.EnvVars("PASSWORD", "PLUGIN_PASSWORD"),
 			},
 			// Pulumi related
 			&cli.StringFlag{
@@ -64,7 +66,7 @@ func main() {
 				Category: catPulumi,
 				Usage:    "Pulumi stack password, used to decipher and recipher the state.",
 				Required: false,
-				EnvVars:  []string{"PULUMI_CONFIG_PASSPHRASE", "PLUGIN_PASSPHRASE"},
+				Sources:  cli.EnvVars("PULUMI_CONFIG_PASSPHRASE", "PLUGIN_PASSPHRASE"),
 			},
 			&cli.StringFlag{
 				Name:     "context",
@@ -72,42 +74,42 @@ func main() {
 				Usage:    "Where to deploy i.e. the Pulumi entrypoint (the directory pointing to a `main.go` file containing the `pulumi.Run` call).",
 				Required: false,
 				Value:    ".",
-				EnvVars:  []string{"CONTEXT", "PLUGIN_CONTEXT"},
+				Sources:  cli.EnvVars("CONTEXT", "PLUGIN_CONTEXT"),
 			},
 			&cli.StringFlag{
 				Name:     "server",
 				Category: catPulumi,
 				Usage:    "Where to download the Pulumi plugin resources. If set, overrides the online default mode of Pulumi.",
 				Required: false,
-				EnvVars:  []string{"SERVER", "PLUGIN_SERVER"},
+				Sources:  cli.EnvVars("SERVER", "PLUGIN_SERVER"),
 			},
 			&cli.StringSliceFlag{
 				Name:     "resources",
 				Category: catPulumi,
 				Usage:    "List of Pulumi plugin resources (<name> <version>) to install before performing the update.",
 				Required: false,
-				EnvVars:  []string{"RESOURCES", "PLUGIN_RESOURCES"},
+				Sources:  cli.EnvVars("RESOURCES", "PLUGIN_RESOURCES"),
 			},
 			&cli.StringSliceFlag{
 				Name:     "configuration",
 				Category: catPulumi,
 				Usage:    "List of configurations tuples (<key> <value>) to pass to the Pulumi entrypoint. Does not support secrets yet.",
 				Required: false,
-				EnvVars:  []string{"CONFIGURATION", "PLUGIN_CONFIGURATION"},
+				Sources:  cli.EnvVars("CONFIGURATION", "PLUGIN_CONFIGURATION"),
 			},
 			&cli.StringFlag{
 				Name:     "outputs",
 				Category: catPulumi,
 				Usage:    "Where to write the Pulumi stack outputs. If set to \"-\" will write to stdout, else to the given filename.",
 				Required: false,
-				EnvVars:  []string{"OUTPUTS", "PLUGIN_OUTPUTS"},
+				Sources:  cli.EnvVars("OUTPUTS", "PLUGIN_OUTPUTS"),
 			},
 		},
 		Action: run,
-		Authors: []*cli.Author{
-			{
-				Name:  "Lucas Tesson - PandatiX",
-				Email: "lucastesson@protonmail.com",
+		Authors: []any{
+			mail.Address{
+				Name:    "Lucas Tesson - PandatiX",
+				Address: "lucastesson@protonmail.com",
 			},
 		},
 		Version: version,
@@ -123,32 +125,32 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	if err := app.RunContext(ctx, os.Args); err != nil {
+	if err := app.Run(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func run(ctx *cli.Context) error {
+func run(ctx context.Context, cmd *cli.Command) error {
 	// Build SDK arguments
 	args := &victor.VictorArgs{
-		Verbose:       ctx.Bool("verbose"),
+		Verbose:       cmd.Bool("verbose"),
 		Version:       version,
-		Statefile:     ctx.String("statefile"),
-		Username:      ptrCli(ctx, "username"),
-		Password:      ptrCli(ctx, "password"),
-		Passphrase:    ctx.String("passphrase"),
-		Context:       ctx.String("context"),
-		Server:        ptrCli(ctx, "server"),
-		Resources:     ctx.StringSlice("resources"),
-		Configuration: ctx.StringSlice("configuration"),
-		Outputs:       ptrCli(ctx, "outputs"),
+		Statefile:     cmd.String("statefile"),
+		Username:      ptrCli(cmd, "username"),
+		Password:      ptrCli(cmd, "password"),
+		Passphrase:    cmd.String("passphrase"),
+		Context:       cmd.String("context"),
+		Server:        ptrCli(cmd, "server"),
+		Resources:     cmd.StringSlice("resources"),
+		Configuration: cmd.StringSlice("configuration"),
+		Outputs:       ptrCli(cmd, "outputs"),
 	}
-	return victor.Victor(ctx.Context, args)
+	return victor.Victor(ctx, args)
 }
 
-func ptrCli(ctx *cli.Context, key string) *string {
-	v := ctx.String(key)
-	if ctx.IsSet(key) {
+func ptrCli(cmd *cli.Command, key string) *string {
+	v := cmd.String(key)
+	if cmd.IsSet(key) {
 		return &v
 	}
 	return nil
