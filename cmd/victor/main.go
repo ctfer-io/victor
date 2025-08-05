@@ -104,6 +104,13 @@ func main() {
 				Required: false,
 				Sources:  cli.EnvVars("OUTPUTS", "PLUGIN_OUTPUTS"),
 			},
+			&cli.BoolFlag{
+				Name:     "destroy-if-non-empty",
+				Category: catPulumi,
+				Usage:    "If set to true, and the update plan is non-empty, destroy EVERYHTING first. Use with caution.",
+				Required: false,
+				Sources:  cli.EnvVars("DESTROY_IF_NON_EMPTY", "PLUGIN_DESTROY_IF_NON_EMPTY"),
+			},
 		},
 		Action: run,
 		Authors: []any{
@@ -133,17 +140,18 @@ func main() {
 func run(ctx context.Context, cmd *cli.Command) error {
 	// Build SDK arguments
 	args := &victor.VictorArgs{
-		Verbose:       cmd.Bool("verbose"),
-		Version:       version,
-		Statefile:     cmd.String("statefile"),
-		Username:      ptrCli(cmd, "username"),
-		Password:      ptrCli(cmd, "password"),
-		Passphrase:    cmd.String("passphrase"),
-		Context:       cmd.String("context"),
-		Server:        ptrCli(cmd, "server"),
-		Resources:     cmd.StringSlice("resources"),
-		Configuration: cmd.StringSlice("configuration"),
-		Outputs:       ptrCli(cmd, "outputs"),
+		Verbose:           cmd.Bool("verbose"),
+		Version:           version,
+		Statefile:         cmd.String("statefile"),
+		Username:          ptrCli(cmd, "username"),
+		Password:          ptrCli(cmd, "password"),
+		Passphrase:        cmd.String("passphrase"),
+		Context:           cmd.String("context"),
+		Server:            ptrCli(cmd, "server"),
+		Resources:         cmd.StringSlice("resources"),
+		Configuration:     cmd.StringSlice("configuration"),
+		Outputs:           ptrCli(cmd, "outputs"),
+		DestroyIfNonEmpty: cmd.Bool("destroy-if-non-empty"),
 	}
 	return victor.Victor(ctx, args)
 }

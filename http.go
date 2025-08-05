@@ -36,11 +36,15 @@ func (client *Client) Do(req *http.Request) (*http.Response, error) {
 		)
 	}
 
-	req.Header.Set("User-Agent", fmt.Sprintf("CTFer.io Victor (%s)", client.version))
+	req.Header.Set("User-Agent", client.UserAgent())
 	if client.username != nil && client.password != nil {
 		bauth := fmt.Sprintf("%s:%s", *client.username, *client.password)
 		bauth = base64.StdEncoding.EncodeToString([]byte(bauth))
 		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", bauth))
 	}
 	return client.sub.Do(req)
+}
+
+func (client *Client) UserAgent() string {
+	return fmt.Sprintf("CTFer.io Victor (%s)", client.version)
 }
