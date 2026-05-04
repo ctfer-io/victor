@@ -7,7 +7,7 @@ require (
 	github.com/pulumi/pulumi/sdk/v3 v3.232.0
 	github.com/urfave/cli/v3 v3.8.0
 	go.uber.org/multierr v1.11.0
-	go.uber.org/zap v1.27.1
+	go.uber.org/zap v1.28.0
 )
 
 require (
